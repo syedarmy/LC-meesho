@@ -1,44 +1,47 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
+// Import the MongoDB library
+const MongoClient = require('mongodb').MongoClient;
 
-header {
-    background-color: #f8f9fa;
-    padding: 20px;
-    text-align: center;
-}
+// Connect to the MongoDB database
+const url = 'mongodb://localhost:27017';
+const dbName = 'meesho-clone';
 
-nav ul {
-    list-style-type: none;
-    padding: 0;
-}
+MongoClient.connect(url, function(err, client) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log('Connected to MongoDB');
 
-nav ul li {
-    display: inline;
-    margin: 0 15px;
-}
+        // Get the products collection
+        const db = client.db(dbName);
+        const productsCollection = db.collection('products');
 
-.product-list {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    margin: 20px;
-}
+        // Add event listener to the add product form
+        document.getElementById('product-form').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-.product-item {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px;
-    text-align: center;
-}
+            // Get the product details
+            const productName = document.getElementById('product-name').value;
+            const productImage = document.getElementById('product-image').files[0];
+            const productPrice = document.getElementById('product-price').value;
 
-footer {
-    background-color: #f8f9fa;
-    text-align: center;
-    padding: 10px;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-}
+            // Create a new product document
+            const product = {
+                name: productName,
+                image: productImage,
+                price: productPrice,
+            };
+
+            // Insert the product into the database
+            productsCollection.insertOne(product, function(err, result) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('Product added successfully');
+
+                    // Display the product on the page
+                    displayProducts();
+                }
+            });
+        });
+
+        // Display products on the page
