@@ -27,8 +27,8 @@ MongoClient.connect(url, function(err, client) {
             // Create a new product document
             const product = {
                 name: productName,
-                image: productImage,
                 price: productPrice,
+                image: URL.createObjectURL(productImage) // Create a URL for the image
             };
 
             // Insert the product into the database
@@ -37,11 +37,38 @@ MongoClient.connect(url, function(err, client) {
                     console.log(err);
                 } else {
                     console.log('Product added successfully');
-
-                    // Display the product on the page
-                    displayProducts();
+                    displayProducts(); // Refresh the product list
                 }
             });
         });
 
-        // Display products on the page
+        // Function to display products on the page
+        function displayProducts() {
+            // Clear the current product list
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            // Retrieve all products from the database
+            productsCollection.find({}).toArray(function(err, products) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    // Loop through the products and create HTML for each
+                    products.forEach(product => {
+                        const productItem = document.createElement('div');
+                        productItem.className = 'product-item';
+                        productItem.innerHTML = `
+                            <img src="${product.image}" alt="${product.name}">
+                            <h2>${product.name}</h2>
+                            <p>Price: ₹${product.price}</p>
+                        `;
+                        productList.appendChild(productItem);
+                    });
+                }
+            });
+        }
+
+        // Initial call to display products when the page loads
+        displayProducts();
+    }
+});
